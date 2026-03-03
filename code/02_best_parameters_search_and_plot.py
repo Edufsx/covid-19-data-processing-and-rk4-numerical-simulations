@@ -74,7 +74,7 @@ def rk4_sistemas3por3(S_dot, I_dot, R_dot, condicao_inicial, a, b, alpha, beta, 
     return t_vetor, S_vetor, I_vetor, R_vetor
 
 def get_parameters(munic, year):
-    dado_real = pd.read_csv(f"../data/filtered_data/{munic}_casos_mm7d_{year}")["casos_sub"].to_list()
+    dado_real = pd.read_csv(f"../data/filtered_data/{munic}_casos_mm7d_{year}")["cases_7-dma"].to_list()
     b = dc_munic_e_ano[munic][year]["b"]
     condicao_inicial = dc_munic_e_ano[munic][year]["condicoes_iniciais"]
     alpha = dc_munic_e_ano[munic][year]["alpha"]
@@ -82,7 +82,8 @@ def get_parameters(munic, year):
 
     return dado_real, b, condicao_inicial, alpha, beta
 
-def search_best_parameters(dado_real, b, condicao_inicial):
+def search_best_parameters(munic,year):
+    dado_real, b, condicao_inicial, alpha, beta = get_parameters(munic,year)
     # Busca de Parametros alpha e beta com menor erro quadrático acumulado
     alpha_vec = np.linspace(0.3, 0.7, 401)
     beta_vec = np.linspace(0.3, 0.7, 401)
@@ -143,6 +144,24 @@ def get_best_I0(dado_real, S0, R0, alpha, beta, I0_interval, b):
     indice_valor_minimo=np.argmin(erro_vec[:,1])
     print(erro_vec[indice_valor_minimo,:])
 
+def plot_casos(munic, year):
+    dado_real, b, condicao_inicial, alpha, beta  = get_parameters(munic, year)
+    t_vector, S_vector, I_vector, R_vector = rk4_sistemas3por3(S_dot, I_dot, R_dot, \
+                                               condicao_inicial, a, b, \
+                                               alpha, beta, h)
+    plt.figure()
+    plt.plot(t_vector, I_vector)
+    plt.plot(dado_real)
+    plt.xlabel(f'Dias - {year}')
+    plt.ylabel(f'Número de casos Confirmados em {munic}')
+    plt.title(f"Casos de Covid em {munic} (Oficial e Simulado) ao longo de {year}")
+    plt.legend(["Simulado", "Oficial"])
+    plt.show()
+
+def plot_6_graphs(cidades, anos):
+    for i in cidades:
+        for k in anos:
+            plot_casos(i, k)
 
 dc_munic_e_ano = {
     "Bauru" : {
@@ -180,8 +199,6 @@ dc_munic_e_ano = {
                 }}
 }
 
-#Bauru Casos busca Parâmetros Otimos Bauru 2020 SIR ARTIGO
-
 # Integracao Numerica
 h = 10**(-3)
 a = 0
@@ -189,17 +206,8 @@ a = 0
 cidades = ["São Paulo", "Bauru"]
 anos = [2020, 2021, 2022]
 
-dado_real, b, condicao_inicial, alpha, beta = get_parameters(cidades[0], 
-                                                             anos[1])
-
-search_best_parameters(dado_real, b, 
-                       condicao_inicial)
+# search_best_parameters(munic=cidades[0], year=anos[0])
 
 # get_best_I0(dado_real, S0=condicao_inicial[0], R0=condicao_inicial[-1], alpha=alpha, beta=beta, I0_interval=13, b=b)
 
-
-"""
-# Salvar os dados simulados em um arquivo texto para construção de gráfico em outro software
-with open('Bauru_casos_Simulados_2020.txt', 'w') as file:
-     file.write(' '.join(map(str, I_diario))) 
-""" 
+plot_6_graphs(cidades, anos)
