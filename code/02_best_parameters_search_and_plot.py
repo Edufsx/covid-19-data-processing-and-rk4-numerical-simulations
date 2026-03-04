@@ -1,3 +1,4 @@
+#%%
 # Numerical operations
 import numpy as np
 # Data manipulation 
@@ -133,7 +134,7 @@ def search_best_parameters(municipality, year):
     Note: This grid search is computationally heavy (~80k simulations).
     tqdm is used to track progress and avoid uncertainty during long runs. 
     """
-
+    
     # Get the COVID data and model parameters
     real_data, t_end, initial_conditions, alpha, beta = get_parameters(municipality, year)
     
@@ -175,37 +176,63 @@ def search_best_parameters(municipality, year):
 
     print("Optimal [alpha, beta, error]:", optimal_parameters)
     
-    return optimal_parameters
+    return optimal_parameters, trimmed_matrix
 
-def get_best_I0(real_data, S0, R0, alpha, beta, I0_end_interval, t_end):
-    # Encontrando o I0 Otimo
-    I0 = 0
+def get_best_I0(I0_end_interval, municipality, year):
+    """
+    Search the best I0 (Initial number of infected people) for the SIR Model 
+    for a selected municipality and year 
+    (considering that the real data could be missing the I0) 
+    by minimizing the cumulative squared error between
+    the simulated infected cases and real COVID-19 data. 
+    """
+
+    # Get the COVID data and model parameters
+    real_data, t_end, initial_conditions, alpha, beta = get_parameters(municipality, year)
+
+    # Initialize matrix to store results of I0 and error
     error_vec=np.zeros([I0_end_interval,2])
-    for k in range(0,I0_end_interval):
-        I0=I0+1
-        initial_conditions = [S0, I0, R0]
+    I0 = 0
+
+    for k in tqdm(range(0,I0_end_interval)):
+
+        # Change the I0 value
+        I0 += 1
+        initial_conditions[1] = I0
+
+        # Simulate SIR Model for the current I0  
         t_vector, S_vector, I_vector, R_vector = rk4_sir_system(S_dot, I_dot, R_dot, \
                                                     initial_conditions, t_start, t_end, \
                                                     alpha, beta, h)
         
-        # Pontos Discretos que Interessam 0, 999, 2*999,...
+       # Extracted daily infected values
         daily_I = extract_daily(I_vector, t_end)
-        
-        error = 0
-        for p in range(t_end+1):
-            error = error + (daily_I[p] - real_data[p])**2
-        
-        resultado = np.array([I0, error])               
-        error_vec[k, :] = resultado    
 
+        # Compute cumulative squared error between simulated and observed data# Compute
+        error = np.sum((np.array(daily_I) - np.array(real_data))**2)
+        
+        # Saves the current I0 and cumulative squared error on the array result
+        result = np.array([I0, error])               
+        error_vec[k, :] = result    
+
+    # Find parameters with minimal error
     min_index=np.argmin(error_vec[:,1])
+    optimal_I0 = error_vec[min_index,:]
     print(error_vec[min_index,:])
 
-def plot_casos(municipality, year):
+    return optimal_I0, error_vec
+
+def plot_cases(municipality, year):
+
+    # Get the COVID data and model parameters
     real_data, t_end, initial_conditions, alpha, beta  = get_parameters(municipality, year)
+
+    # Simulate SIR Model  
     t_vector, S_vector, I_vector, R_vector = rk4_sir_system(S_dot, I_dot, R_dot, \
                                                initial_conditions, t_start, t_end, \
                                                alpha, beta, h)
+    
+    # Plot graphs comparing the simulated and actual COVID-19 cumulative cases over time 
     plt.figure()
     plt.plot(t_vector, I_vector)
     plt.plot(real_data)
@@ -215,11 +242,14 @@ def plot_casos(municipality, year):
     plt.legend(["Simulado", "Oficial"])
     plt.show()
 
-def plot_6_graphs(cidades, anos):
-    for i in cidades:
-        for k in anos:
-            plot_casos(i, k)
+# Plot graphs using "plot_cases()" for São Paulo and Bauru (2020-2022)  
+def plot_6_graphs(municipalities, years):
+    for municipality in municipalities:
+        for year in years:
+            plot_cases(municipality, year)
 
+# Dictionary containing the parameters obtained from research 
+# and simulations for each municipality and year
 municipality_year_params = {
     "Bauru" : {
         2020 : {"alpha" : 0.576, 
@@ -256,15 +286,23 @@ municipality_year_params = {
                 }}
 }
 
-# Integracao Numerica
+# Numeric Integration parameters that remain constant across municipalities or years once defined
 h = 10**(-3)
 t_start = 0
 
-cidades = ["São Paulo", "Bauru"]
-anos = [2020, 2021, 2022]
+# Define municipalities to filter COVID-19 data for São Paulo and Bauru (2020 - 2022)
+municipalities = ["São Paulo", "Bauru"]
+years = [2020, 2021, 2022]
 
-search_best_parameters(municipality=cidades[0], year=anos[0])
+# Plot graphs for São Paulo and Bauru (2020-2022)
+plot_6_graphs(municipalities, years) 
 
-# get_best_I0(real_data, S0=initial_conditions[0], R0=initial_conditions[-1], alpha=alpha, beta=beta, I0_end_interval=13, t_end=t_end)
+""" 
+# This function takes a long time to run:
+search_best_parameters(municipality=municipalities[0], year=years[0])
+"""
 
-# plot_6_graphs(cidades, anos)
+
+""" # This function just makes sense once we have the best alpha and beta parameters
+get_best_I0(I0_end_interval=13, municipality=municipalities[0], year=years[0])
+ """
