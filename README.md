@@ -81,7 +81,15 @@ FRANCO, C. M. R.; DUTRA, R. F. **SIR model for propagation of COVID-19 in the Pa
 - Estimation of the initial number of infected individuals;
 - Graphical comparison between **simulated data and observed data**.
 
+## Paper
 
+The complete manuscript related to this project is available in the repository:
+
+[`Paper PDF`](paper/submitted_paper_covid19_data_analysis_eduardo_ferreira.pdf)
+
+This article presents the full study, including the mathematical modeling, data analysis, and numerical simulations related to COVID-19 dynamics.
+
+> ⚠️ **Note:** This version of the paper is currently undergoing revisions and improvements prior to submission to a scientific journal. Therefore, the manuscript and associated materials in this repository may still receive updates.
 
 ## Libraries Used
 
@@ -180,6 +188,15 @@ FRANCO, C. M. R.; DUTRA, R. F. **SIR model for propagation of COVID-19 in the Pa
 - Estimativa do número inicial de infectados;
 - Comparação gráfica entre **dados simulados e dados observados**.
 
+## Artigo
+
+O manuscrito completo relacionado a este projeto está disponível no repositório:
+
+[`PDF do artigo`](paper/submitted_paper_covid19_data_analysis_eduardo_ferreira.pdf)
+
+Este artigo apresenta o estudo completo, incluindo a modelagem matemática, análise de dados e simulações numéricas relacionadas à dinâmica da COVID-19.
+
+> ⚠️ **Nota:** Esta versão do artigo ainda está passando por revisões e ajustes antes da submissão a um periódico científico. Portanto, o manuscrito e os materiais associados neste repositório ainda podem receber atualizações.
 
 ## Bibliotecas Utilizadas
 
