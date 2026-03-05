@@ -1,3 +1,4 @@
+#%%
 # Importe the Pandas library for filter and manipulate COVID data from the municipality of São Paulo
 import pandas as pd
 
@@ -43,7 +44,7 @@ def data_filter(data:pd.DataFrame, city:str, year:int):
     return filtered_data["cases_7-dma"]
 
 # Load COVID-19 case data for the state of São Paulo to begin the data filtering
-data = pd.read_csv("../data/dados_covid_sp.csv", sep=";")
+data = pd.read_csv("../data/sao_paulo_covid_data.csv", sep=";")
 
 # Define municipalities to filter COVID-19 data for São Paulo and Bauru (2020 - 2022) 
 municipalities = ["São Paulo", "Bauru"]
@@ -53,8 +54,13 @@ years = [2020, 2021, 2022]
 for municipality in municipalities:
     for year in years:
         filtered_df = data_filter(data, municipality, year)
+        municipality_name = (
+            municipality.lower()
+            .replace(" ", "_")
+            .replace("ã", "a")
+        )
         filtered_df.to_csv(
-            f"../data/filtered_data/{municipality}_casos_mm7d_{year}", 
+            f"../data/filtered_data/{municipality_name}_cases_ma7d_{year}", 
             index=False
         )
         
