@@ -1,4 +1,4 @@
-# (EN) COVID-19 Data Analysis and Numerical Simulations of the SIR Model
+# (EN 🇺🇸) COVID-19 Data Analysis and Numerical Simulations of the SIR Model
 
 ## Introduction
 This repository contains **Python** codes for processing official COVID-19 data and simulating the pandemic dynamics using the **Susceptible-Infected-Recovered (SIR) epidemiological model**, solved numerically using the **fourth-order Runge–Kutta method (RK4)**.
